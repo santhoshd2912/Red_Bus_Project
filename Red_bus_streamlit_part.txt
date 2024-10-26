@@ -1,0 +1,1488 @@
+import pandas as pd
+import mysql.connector 
+import streamlit as st
+import time
+from datetime import datetime
+
+# Configure the page layout:
+st.set_page_config(
+    layout="wide",
+    page_title="RedBus Information System",
+    page_icon="🚌"
+)
+
+# Setup streamlit Appliction:
+st.markdown("""
+    <style>
+        .main-header {
+            background: linear-gradient(to right, #cc4040, #cc3333);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .sub-header {
+            background-color: white;
+            padding: 7px;
+            border-radius: 4px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .welcome-text {
+            color: #ffffff;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .info-text {
+            color: #2c3e50;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+        }
+    </style>""", unsafe_allow_html=True)
+
+st.markdown("""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <div class="main-header">
+        <h1 class="welcome-text" style="font-size: 36px;">
+            <i class="fas fa-bus"></i> RedBus Comprehensive Bus Information
+        </h1>
+        <p style="color: white; text-align: center; font-size: 18px;">Your one-stop solution for all bus travel needs</p>
+    </div>""", unsafe_allow_html=True)
+
+# Sub-header part
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+        <div class="sub-header">
+            <h2 class="info-text" style="font-size: 26px;">  Welcome to RedBus Schedule Viewer!</h2>
+            <p class="info-text" style="font-size: 18px;">  Explore bus routes, timings, and prices with ease</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+        <div class="sub-header">
+            <h2 class="info-text" style="font-size: 26px;">Real-Time Information</h2>
+            <p class="info-text" style="font-size: 18px;">Get instant access to schedules and availability</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+# Current time display
+current_time = datetime.now().strftime("%B %d, %Y %H:%M:%S")
+st.markdown(f"""
+    <div style='text-align: center; padding: 10px; background-color: #f8f9fa; border-radius: 5px;'>
+        <p style='color: #666; font-size: 14px;'>Last Updated: {current_time}</p>
+    </div>
+""", unsafe_allow_html=True) 
+
+# Setup Select State column:
+state = st.selectbox("select the state", ["Andhra Pradesh", "Telangana", "Uttar Pradesh",
+                                          "Rajasthan", "Himachal Pradesh", "Bihar", "Sikkim",
+                                          "Punjab", "Kerala", "Assam"])
+
+if state == "Andhra Pradesh":
+
+    Route=st.selectbox("select the route", ["Vijayawada to Hyderabad","Kakinada to Visakhapatnam",
+                                           "Ongole to Hyderabad","Kadapa to Bangalore",
+                                           "Chittoor (Andhra Pradesh) to Bangalore",
+                                           "Visakhapatnam to Kakinada"])
+    
+    if Route=="Vijayawada to Hyderabad":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Vijayawada to Hyderabad' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+
+
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Kakinada to Visakhapatnam":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kakinada to Visakhapatnam' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Kadapa to Bangalore":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kadapa to Bangalore' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Chittoor (Andhra Pradesh) to Bangalore":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Chittoor (Andhra Pradesh) to Bangalore' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Visakhapatnam to Kakinada":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Visakhapatnam to Kakinada' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_VK = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_VK['price'].min())
+        max_price = int(df_VK['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_VK')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_VK[(df_VK['price'] >= price_range[0]) & (df_VK['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Ongole to Hyderabad":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Ongole to Hyderabad' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_OH')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+#Telangana:
+
+if state == "Telangana":
+
+    Route=st.selectbox("select the route", ["Hyderabad to Ongole","Hyderabad to Vijayawada",
+                                           "Khammam to Hyderabad","Hyderabad to Khammam",
+                                           "Hyderabad to Karimnagar",
+                                           "Hyderabad to Mancherial","Hyderabad to Nirmal","Hyderabad to Adilabad"])
+    
+    if Route=="Hyderabad to Ongole":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Ongole' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+
+
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Hyderabad to Vijayawada":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Vijayawada' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Khammam to Hyderabad":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Khammam to Hyderabad' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Hyderabad to Khammam":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Khammam' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Hyderabad to Karimnagar":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Karimnagar' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_VK = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_VK['price'].min())
+        max_price = int(df_VK['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_VK')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_VK[(df_VK['price'] >= price_range[0]) & (df_VK['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Hyderabad to Mancherial":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Mancherial' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        if min_price == max_price:
+            max_price +=1
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    if Route=="Hyderabad to Adilabad":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Adilabad' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_OH')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    if Route=="Hyderabad to Nirmal":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hyderabad to Nirmal' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_OH')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+#Uttar Pradesh
+if state == "Uttar Pradesh":
+
+    Route=st.selectbox("select the route", ["Delhi to Bareilly","Bareilly to Delhi","Delhi to Aligarh (uttar pradesh)","Lucknow to Delhi",
+                                            "Delhi to Farrukhabad (Uttar Pradesh)","Farrukhabad (Uttar Pradesh) to Delhi"])
+    
+    if Route=="Delhi to Bareilly":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Delhi to Bareilly' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+
+
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+       
+    if Route=="Bareilly to Delhi":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Bareilly to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+
+
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+#Rajasthan
+if state == "Rajasthan":
+
+    Route=st.selectbox("select the route", ["Jodhpur to Ajmer","Beawar (Rajasthan) to Jaipur (Rajasthan)",
+                                            "Sikar to Jaipur (Rajasthan)","Jaipur (Rajasthan) to Jodhpur",
+                                            "Jaipur (Rajasthan) to Aligarh (uttar pradesh)",
+                                            "Jodhpur to Beawar (Rajasthan)","Kishangarh to Jaipur (Rajasthan)"]
+                                            )
+    
+    if Route=="Jodhpur to Ajmer":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Jodhpur to Ajmer' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Beawar (Rajasthan) to Jaipur (Rajasthan)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Beawar (Rajasthan) to Jaipur (Rajasthan)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Sikar to Jaipur (Rajasthan)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Sikar to Jaipur (Rajasthan)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Jaipur (Rajasthan) to Aligarh (uttar pradesh)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Jaipur (Rajasthan) to Aligarh (uttar pradesh)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Jodhpur to Beawar (Rajasthan)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Jodhpur to Beawar (Rajasthan)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_VK = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_VK['price'].min())
+        max_price = int(df_VK['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_VK')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_VK[(df_VK['price'] >= price_range[0]) & (df_VK['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Kishangarh to Jaipur (Rajasthan)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kishangarh to Jaipur (Rajasthan)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    if Route=="Jaipur (Rajasthan) to Jodhpur":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Jaipur (Rajasthan) to Jodhpur' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+#Himachal Pradesh
+if state == "Himachal Pradesh":
+
+    Route=st.selectbox("select the route", ["Delhi to Shimla","Shimla to Delhi","Delhi to Hamirpur (Himachal Pradesh)",
+                                            "Chandigarh to Dharamshala (Himachal Pradesh)","Chandigarh to Hamirpur (Himachal Pradesh)",
+                                            "Hamirpur (Himachal Pradesh) to Chandigarh","Hamirpur (Himachal Pradesh) to Delhi"])
+    
+    if Route=="Delhi to Shimla":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Delhi to Shimla' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Shimla to Delhi":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Shimla to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Delhi to Hamirpur (Himachal Pradesh)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi to Hamirpur (Himachal Pradesh)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Chandigarh to Dharamshala (Himachal Pradesh)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Chandigarh to Dharamshala (Himachal Pradesh)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Chandigarh to Hamirpur (Himachal Pradesh)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Chandigarh to Hamirpur (Himachal Pradesh)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_VK = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_VK['price'].min())
+        max_price = int(df_VK['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_VK')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_VK[(df_VK['price'] >= price_range[0]) & (df_VK['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Hamirpur (Himachal Pradesh) to Chandigarh":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hamirpur (Himachal Pradesh) to Chandigarh' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    if Route=="Hamirpur (Himachal Pradesh) to Delhi":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Hamirpur (Himachal Pradesh) to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+#PUNJAB
+if state=="Punjab":
+
+    Route=st.selectbox("select the route",["Delhi to Patiala","Delhi to Ludhiana","Ludhiana to Delhi",
+                                            "Jalandhar to Delhi","Delhi to Jalandhar","Delhi Airport to Patiala",
+                                            "Ludhiana to Delhi Airport","Delhi Airport to Ludhiana",
+                                            "Jalandhar to Delhi Airport"
+                                            ])
+    
+    if Route=="Delhi to Patiala":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Delhi to Patiala' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Delhi to Ludhiana":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi to Ludhiana' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Ludhiana to Delhi":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Ludhiana to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Jalandhar to Delhi":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Jalandhar to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Delhi to Jalandhar":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi to Jalandhar' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_VK = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_VK['price'].min())
+        max_price = int(df_VK['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_VK')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_VK[(df_VK['price'] >= price_range[0]) & (df_VK['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+
+    
+    if Route=="Delhi Airport to Patiala":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi Airport to Patiala' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+        
+    if Route=="Jalandhar to Delhi Airport":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Jalandhar to Delhi Airport' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+        
+    if Route=="Delhi Airport to Ludhiana":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi Airport to Ludhiana' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+        
+    if Route=="Ludhiana to Delhi Airport":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Ludhiana to Delhi Airport' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_OH = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_OH['price'].min())
+        max_price = int(df_OH['price'].max())
+
+        price_range = st.slider("Select Price Range", min_value=min_price,max_value=max_price, value=(min_price,max_price),key='df_HM')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_OH[(df_OH['price'] >= price_range[0]) & (df_OH['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+ #Skikkim
+if state == "Sikkim":
+
+    Route=st.selectbox("select the route", ["Delhi to Chandigarh","Guwahati to Tezpur"])
+    
+    if Route=="Guwahati to Tezpur":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Guwahati to Tezpur' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+        
+    if Route=="Delhi to Chandigarh":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Delhi to Chandigarh' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+#Meghalaya
+if state == "Bihar":
+
+    Route=st.selectbox("select the route", ["Gopalganj (Bihar) to Delhi","Motihari to Delhi","Bettiah to Patna (Bihar)"])
+    
+    if Route=="Gopalganj (Bihar) to Delhi":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Gopalganj (Bihar) to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+    
+    if Route=="Motihari to Delhi":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Motihari to Delhi' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    if Route=="Bettiah to Patna (Bihar)":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Bettiah to Patna (Bihar)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+
+#KERALA
+
+if state == "Kerala":
+
+    Route=st.selectbox("select the route", ["Kozhikode to Bangalore","Kozhikode to Ernakulam","Kozhikode to Mysore",
+                                            "Kannur to Bangalore","Kozhikode to Thiruvananthapuram"])
+    
+    if Route=="Kozhikode to Bangalore":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Kozhikode to Bangalore' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Kozhikode to Ernakulam":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kozhikode to Ernakulam' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Kozhikode to Mysore":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kozhikode to Mysore' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Kozhikode to Thiruvananthapuram":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kozhikode to Thiruvananthapuram' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+        
+    if Route=="Kannur to Bangalore":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Kannur to Bangalore' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+#Assam
+if state == "Assam":
+
+    Route=st.selectbox("select the route", ["Tezpur to Guwahati","Guwahati to Nagaon (Assam)", 
+                                            "Goalpara to Guwahati","Guwahati to Shillong"])
+    
+    if Route=="Tezpur to Guwahati":
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+    
+        query='''Select * from bus_details where Route_name = 'Tezpur to Guwahati' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_AP = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                              "Start_time", "end_time", "rating", "price", "seats",
+                                              "Route_name", "Route_link", "state_name"])
+        
+        
+     #Create Price Slide
+        min_price = int(df_AP['price'].min())
+        max_price = int(df_AP['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_AP')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_AP[(df_AP['price'] >= price_range[0]) & (df_AP['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+    
+     
+    if Route=="Guwahati to Nagaon (Assam)":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Guwahati to Nagaon (Assam)' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KV = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+    #Create Price Slide
+        min_price = int(df_KV['price'].min())
+        max_price = int(df_KV['price'].max())
+    
+        price_range_KV = st.slider('Select Price Range', min_value=min_price, max_value=max_price,value=(min_price, max_price),key='df_KV')
+
+    # Filter the DataFrame based on the selected price range
+        filtered_df_KV = df_KV[(df_KV['price'] >= price_range_KV[0]) & (df_KV['price'] <= price_range_KV[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df_KV)
+    
+
+    if Route=="Goalpara to Guwahati":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Goalpara to Guwahati' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_KB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_KB['price'].min())
+        max_price = int(df_KB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_KB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_KB[(df_KB['price'] >= price_range[0]) & (df_KB['price'] <= price_range[1])]
+    
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+    
+    if Route=="Guwahati to Shillong":
+     
+        conn = mysql.connector.connect(host="localhost",user="root",database="red_bus_project")
+        my_cursor = conn.cursor()
+        query='''Select * from bus_details where Route_name = 'Guwahati to Shillong' '''
+    
+        my_cursor.execute(query)
+        fetch = my_cursor.fetchall()
+        df_CB = pd.DataFrame(fetch, columns=["ID", "bus_name", "total_duration", "bus_type",
+                                         "Start_time", "end_time", "rating", "price", "seats",
+                                         "Route_name", "Route_link", "state_name"])
+
+    #Create Price Slide
+        min_price = int(df_CB['price'].min())
+        max_price = int(df_CB['price'].max())
+    
+        price_range = st.slider("Select Price Range", min_value=min_price, max_value=max_price, value=(min_price, max_price),key='df_CB')
+    
+    # Filter the DataFrame based on the selected price range
+        filtered_df = df_CB[(df_CB['price'] >= price_range[0]) & (df_CB['price'] <= price_range[1])]
+
+    # Display the filtered DataFrame
+        st.write(filtered_df)
+
+       
+
+    
+
+
+
+    
+    # Close the connection
+    conn.close()
